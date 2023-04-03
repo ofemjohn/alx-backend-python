@@ -1,23 +1,18 @@
+#!/usr/bin/env python3
+"""
+returns a list of n random floats generated
+using the wait_random coroutine
+"""
+
 import asyncio
 from typing import List
-from concurrent.futures import FIRST_COMPLETED
-from typing import Callable
-wait_random: Callable = __import__('0-basic_async_syntax').wait_random
-'''
-returns a list of n random flo
-ats generated using the wait_random coroutine
-'''
+
+wait_random = __import__('0-basic_async_syntax').wait_random
 
 
 async def wait_n(n: int, max_delay: int) -> List[float]:
-    '''
-    Spawns wait_random n times with the specified
-    max_delay and returns the delays in ascending order
-    '''
+    """
+    'Coroutine that returns a random float after a random delay
+    """
     tasks = [asyncio.create_task(wait_random(max_delay)) for _ in range(n)]
-    delays = []
-    while tasks:
-        done, tasks = await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
-        for task in done:
-            delays.append(await task)
-    return delays
+    return [await task for task in asyncio.as_completed(tasks)]
