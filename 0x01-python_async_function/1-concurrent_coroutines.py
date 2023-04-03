@@ -2,6 +2,7 @@
 import asyncio
 from typing import Callable, List
 wait_random: Callable = __import__('0-basic_async_syntax').wait_random
+
 '''
     execute multiple coroutines at the same time with async
 '''
