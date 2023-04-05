@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+'''
+asynchronous coroutine that takes in an integer argument
+'''
+
 import asyncio
 import random
-'''
-    asynchronous coroutine that takes in an integer argument
-'''
 
 
 async def wait_random(max_delay: int = 10) -> float:
