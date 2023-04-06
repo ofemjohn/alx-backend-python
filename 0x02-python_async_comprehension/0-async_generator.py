@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """ Async Comprehensions """
 
-from asyncio import sleep
 import asyncio
 from random import uniform
 import random
