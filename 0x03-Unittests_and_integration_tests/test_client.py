@@ -40,8 +40,8 @@ class TestGithubOrgClient(unittest.TestCase):
         with patch.object(
             GithubOrgClient, '_public_repos_url', callable=PropertyMock
         ) as pub_url_repo_mock:
-            pub_url_repo_mock.return_value = \
-              'https://api.github.com/orgs/testorg/repos'
+            url = 'https://api.github.com/orgs/testorg/repos'
+            pub_url_repo_mock.return_value = url
             user = GithubOrgClient('testorg')
             results = user.public_repos()
             self.assertEqual(results, ['repos', 'repo'])
