@@ -24,4 +24,4 @@ class TestAccessNestedMap(unittest.TestCase):
                                          expected_excepeption):
         '''test map with exception thrown'''
         with self.assertRaises(KeyError):
-            utils.access_nested_map(nested_map, map, expected_excepeption)
+            utils.access_nested_map(nested_map, path, expected_excepeption)
