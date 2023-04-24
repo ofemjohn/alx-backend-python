@@ -3,7 +3,7 @@
    Farmialize with client.GitHubOrgClient.
 '''
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, PropertyMock
 from parameterized import parameterized
 from client import GithubOrgClient
 
@@ -21,3 +21,13 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_response.assert_called_once_with(
             f"https://api.github.com/orgs/{org_n}"
         )
+
+    def test_public_repos_url(self):
+        payload = {'repose_url': 'https://api.github.com/orgs/testorg/repos'}
+        with patch.object(
+            GithubOrgClient, 'org', calla_ble=PropertyMock
+        ) as org_mock:
+            org_mock.return_value = payload
+            user = GithubOrgClient('testorg')
+            results = 'https://api.github.com/orgs/testorg/repos'
+            self.assertEqual(user._public_repos_url, results)
