@@ -32,7 +32,7 @@ class TestGithubOrgClient(unittest.TestCase):
             results = 'https://api.github.com/orgs/testorg/repos'
             self.assertEqual(user._public_repos_url, results)
 
-    def test_public_repos(self, get_json: str) -> list[str]:
+    def test_public_repos(self, get_json):
         payload = [{'name': 'repos'}, {'name': 'repo'}]
         get_json.return_value = payload
         with patch.object(
