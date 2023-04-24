@@ -18,8 +18,8 @@ class TestAccessNestedMap(unittest.TestCase):
                          expected_output)
 
     @parameterized.expand([
-        ({}, ('a',), "KeyError('a',)"),
-        ({'a': 1}, ({'a': 'b'}), "KeyError('b',)")
+        ({}, ('a',)),
+        ({'a': 1}, ({'a', 'b'}))
     ])
     def test_access_nested_map_exception(self, nested_map, path):
         '''test map with exception thrown'''
