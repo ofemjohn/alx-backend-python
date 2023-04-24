@@ -23,6 +23,7 @@ class TestGithubOrgClient(unittest.TestCase):
         )
 
     def test_public_repos_url(self):
+        '''test public repo url'''
         payload = {'repose_url': 'https://api.github.com/orgs/testorg/repos'}
         with patch.object(
             GithubOrgClient, 'org', calla_ble=PropertyMock
@@ -33,6 +34,7 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(user._public_repos_url, results)
 
     def test_public_repos(self, get_json):
+        '''test public repo'''
         payload = [{'name': 'repos'}, {'name': 'repo'}]
         get_json.return_value = payload
         with patch.object(
