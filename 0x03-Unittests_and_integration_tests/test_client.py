@@ -48,3 +48,16 @@ class TestGithubOrgClient(unittest.TestCase):
             get_json.assert_called_once_with(
                 'https://api.github.com/orgs/testorg/repos'
             )
+
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False),
+        ({}, "my_license", False),
+        ({"license": {"key": "my_license", "name": "License name"}},
+         "my_license", True),
+        ({"license": {"key": "other_license", "name": "License name"}},
+         "my_license", False),
+    ])
+    def test_has_license(self, repo, license_key, result):
+        user = GithubOrgClient("testorg")
+        self.assertEqual(user.has_license(repo, license_key), result)
