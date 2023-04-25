@@ -65,7 +65,7 @@ class TestGithubOrgClient(unittest.TestCase):
 
 
 @parameterized_class(
-    ("org_payload", "repos_payload", "expected_repos", "apache2_repos"),
+    ("org_payload", "payload", "expected_repos", "apache2_repos"),
     TEST_PAYLOAD
 )
 class TestIntegrationGithubOrgClient(unittest.TestCase):
@@ -76,8 +76,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         '''set up class'''
         setup = {'return_value.json.side_effect':
                  [
-                     cls.org_payload, cls.repos_payload,
-                     cls.org_payload, cls.repos_payload
+                     cls.org_payload, cls.payload,
+                     cls.org_payload, cls.payload
                  ]
                  }
         cls.get_patcher = patch('requests.get', **setup)
@@ -89,7 +89,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         test_class = GithubOrgClient("google")
 
         self.assertEqual(test_class.org, self.org_payload)
-        self.assertEqual(test_class.repos_payload, self.repos_payload)
+        self.assertEqual(test_class.repos_payload, self.payload)
         self.assertEqual(test_class.public_repos(), self.expected_repos)
         self.assertEqual(test_class.public_repos("XLICENSE"), [])
         self.mock.assert_called()
@@ -106,5 +106,5 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """A class method called after tests in an individual class have run"""
+        '''tear down'''
         cls.get_patcher.stop()
