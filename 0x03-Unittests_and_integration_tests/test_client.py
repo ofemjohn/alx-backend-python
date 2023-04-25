@@ -102,3 +102,6 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         user = GithubOrgClient('testorg')
         results = user.public_repos('apache-2.0')
         self.assertEqual(results, self.apache2_repos)
+
+if __name__ == "__main__":
+    unittest.main()
