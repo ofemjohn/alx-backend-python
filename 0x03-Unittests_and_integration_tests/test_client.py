@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import Mock, patch, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
-from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -64,44 +64,53 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(user.has_license(repo, license_key), result)
 
 
-@parameterized_class(
-    [{'org_payload': org_payload, 'repos_payload': repos_payload,
-     'expected_repos': expected_repos, 'apache2_repos': apache2_repos}
-     ])
-class TestIntegrationGithubOrgClient(unittest.TestCase):
-    '''integration test'''
-    @classmethod
-    def setUpClass(cls):
-        '''set up class'''
-        cls.patcher = patch('client.requests.get')
-        cls.mock_get = cls.patcher.start()
-
-        # Mock the response for the org endpoint
-        cls.mock_org_response = Mock()
-        cls.mock_org_response.json.return_value = cls.org_payload
-        cls.mock_get.return_value = cls.mock_org_response
-
-        # Mock the response for the repos endpoint
-        cls.mock_repos_response = Mock()
-        cls.mock_repos_response.json.return_value = cls.repos_payload
-        cls.mock_get.return_value = cls.mock_repos_response
-
-    @classmethod
-    def tearDownClass(cls):
-        '''teadown class'''
-        cls.get_patcher.stop()
+@parameterized_class(['org_payload', 'repos_payload',
+                      'expected_repos', 'apache2_repos'], TEST_PAYLOAD)
+class TestGithubOrgClient(unittest.TestCase):
+    @parameterized.expand([
+        ('google', {'payload': True}),
+        ('abc', {'payload': False})
+    ])
+    @patch('client.get_json')
+    def test_org(self, org_n, payload_expected, mock_response):
+        mock_response.return_value = payload_expected
+        user = GithubOrgClient(org_n)
+        self.assertEqual(user.org, payload_expected)
+        mock_response.assert_called_once_with(
+            f"https://api.github.com/orgs/{org_n}"
+        )
 
     def test_public_repos(self):
-        '''test public repos'''
-        user = GithubOrgClient('testorg')
-        results = user.public_repos()
-        self.assertEqual(results, self.expected_repos)
+        '''test public repo'''
+        with patch.object(
+            GithubOrgClient, '_public_repos_url', callable=PropertyMock
+        ) as pub_url_repo_mock, patch('client.get_json') as get_json_mock:
+            url = 'https://api.github.com/orgs/testorg/repos'
+            pub_url_repo_mock.return_value = url
+            get_json_mock.return_value = [{'name': 'repos'}, {'name': 'repo'}]
+            user = GithubOrgClient('testorg')
+            results = user.public_repos()
+            self.assertEqual(results, ['repos', 'repo'])
+            pub_url_repo_mock.assert_called_once_with(user)
+            get_json_mock.assert_called_once_with(url)
 
-    def test_public_repos_apache2_license(self):
-        '''test apache2 licence repo'''
-        user = GithubOrgClient('testorg')
-        results = user.public_repos('apache-2.0')
-        self.assertEqual(results, self.apache2_repos)
+    def test_public_repos_with_license(self):
+        '''test public repo with license'''
+        with patch.object(
+            GithubOrgClient, '_public_repos_url', callable=PropertyMock
+        ) as pub_url_repo_mock, patch('client.get_json') as get_json_mock:
+            url = 'https://api.github.com/orgs/testorg/repos'
+            pub_url_repo_mock.return_value = url
+            get_json_mock.return_value = [
+                {'name': 'repos', 'license': {'key': 'apache-2.0'}},
+                {'name': 'repo', 'license': {'key': 'mit'}}
+            ]
+            user = GithubOrgClient('testorg')
+            results = user.public_repos(license='apache-2.0')
+            self.assertEqual(results, ['repos'])
+            pub_url_repo_mock.assert_called_once_with(user)
+            get_json_mock.assert_called_once_with(url)
+
 
 if __name__ == "__main__":
     unittest.main()
