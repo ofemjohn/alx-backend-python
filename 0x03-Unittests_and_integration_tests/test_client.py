@@ -4,8 +4,9 @@
 '''
 import unittest
 from unittest.mock import Mock, patch, PropertyMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -61,3 +62,43 @@ class TestGithubOrgClient(unittest.TestCase):
     def test_has_license(self, repo, license_key, result):
         user = GithubOrgClient("testorg")
         self.assertEqual(user.has_license(repo, license_key), result)
+
+
+@parameterized_class(
+    [{'org_payload': org_payload, 'repos_payload': repos_payload,
+     'expected_repos': expected_repos, 'apache2_repos': apache2_repos}
+     ])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    '''integration test'''
+    @classmethod
+    def setUpClass(cls):
+        '''set up class'''
+        cls.patcher = patch('client.requests.get')
+        cls.mock_get = cls.patcher.start()
+
+        # Mock the response for the org endpoint
+        cls.mock_org_response = Mock()
+        cls.mock_org_response.json.return_value = cls.org_payload
+        cls.mock_get.return_value = cls.mock_org_response
+
+        # Mock the response for the repos endpoint
+        cls.mock_repos_response = Mock()
+        cls.mock_repos_response.json.return_value = cls.repos_payload
+        cls.mock_get.return_value = cls.mock_repos_response
+
+    @classmethod
+    def tearDownClass(cls):
+        '''teadown class'''
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        '''test public repos'''
+        user = GithubOrgClient('testorg')
+        results = user.public_repos()
+        self.assertEqual(results, self.expected_repos)
+
+    def test_public_repos_apache2_license(self):
+        '''test apache2 licence repo'''
+        user = GithubOrgClient('testorg')
+        results = user.public_repos('apache-2.0')
+        self.assertEqual(results, self.apache2_repos)
